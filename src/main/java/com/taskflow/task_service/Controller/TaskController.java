@@ -4,6 +4,8 @@ import com.taskflow.task_service.Entity.TaskDetail;
 import com.taskflow.task_service.Service.EmailServiceClient;
 import com.taskflow.task_service.Service.TaskService;
 import com.taskflow.task_service.Service.UserClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -26,6 +28,7 @@ public class TaskController {
     EmailServiceClient emailServiceClient;
     @Autowired
     UserClient userClient;
+    Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @GetMapping("/get")
     public List<TaskDetail> GetAllTasks()
@@ -39,6 +42,7 @@ public class TaskController {
         String subject = "Task Created";
         String body = "A new task has been created";
         TaskDetail taskDetail = taskService.createTask(task);
+        logger.info("Task Created Successfully");
         return emailServiceClient.sendEmail(toMail,subject,body);
     }
     @PutMapping("/update")
@@ -50,6 +54,7 @@ public class TaskController {
         TaskDetail taskDetail = taskService.updateTask(task);
        // return emailServiceClient.sendEmail(toMail,subject,body);
         emailServiceClient.sentEmailUsingWebClient(toMail,subject,body);
+        logger.debug("Task Updated Successfully");
         return ResponseEntity.ok("Finished");
     }
 
