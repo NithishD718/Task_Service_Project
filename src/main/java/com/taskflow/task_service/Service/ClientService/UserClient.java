@@ -1,4 +1,4 @@
-package com.taskflow.task_service.Service;
+package com.taskflow.task_service.Service.ClientService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

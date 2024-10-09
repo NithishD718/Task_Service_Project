@@ -2,6 +2,7 @@ package com.taskflow.task_service.Entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
 
 @Data
 @Entity
@@ -13,9 +14,7 @@ public class TaskDetail {
     private String name;
     private String description;
     private Boolean isCompleted;
+    @Getter
     private Integer userId;
-
-    public Integer getUserId() {
-        return userId;
-    }
+    private String attachmentId;
 }

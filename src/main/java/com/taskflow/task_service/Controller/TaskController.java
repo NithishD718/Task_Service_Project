@@ -1,19 +1,17 @@
 package com.taskflow.task_service.Controller;
 
 import com.taskflow.task_service.Entity.TaskDetail;
-import com.taskflow.task_service.Service.EmailServiceClient;
+import com.taskflow.task_service.Service.ClientService.EmailServiceClient;
 import com.taskflow.task_service.Service.TaskService;
-import com.taskflow.task_service.Service.UserClient;
+import com.taskflow.task_service.Service.ClientService.UserClient;
+import org.apache.coyote.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.core.io.Resource;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
-import reactor.core.publisher.Mono;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -36,12 +34,11 @@ public class TaskController {
         return taskService.getAllTasks();
     }
     @PostMapping("/create")
-    public ResponseEntity<String> CreateTask(@RequestBody TaskDetail task)
-    {
-        String toMail = userClient.getUserEmail(task.getUserId()); //While geting username userservice passes login html page from filter so error comes
+    public ResponseEntity<String> CreateTask(@RequestPart("taskRequest") TaskDetail taskRequest,@RequestPart("file") MultipartFile file) throws Exception {
+        String toMail = userClient.getUserEmail(taskRequest.getUserId()); //While geting username userservice passes login html page from filter so error comes
         String subject = "Task Created";
         String body = "A new task has been created";
-        TaskDetail taskDetail = taskService.createTask(task);
+        TaskDetail taskDetail = taskService.createTask(taskRequest,file);
         logger.info("Task Created Successfully");
         return emailServiceClient.sendEmail(toMail,subject,body);
     }
@@ -56,6 +53,22 @@ public class TaskController {
         emailServiceClient.sentEmailUsingWebClient(toMail,subject,body);
         logger.debug("Task Updated Successfully");
         return ResponseEntity.ok("Finished");
+    }
+
+    @GetMapping("/view/{taskId}")
+    public ResponseEntity<TaskDetail> viewTask(@PathVariable int taskId)
+    {
+       TaskDetail taskDetail =  taskService.getTask(taskId);
+       if(taskDetail!=null)
+           return ResponseEntity.ok(taskDetail);
+       else
+           return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+    }
+
+    @GetMapping("/downloadFile/{taskId}")
+    public ResponseEntity<Resource> downloadTaskFile(@PathVariable int taskId)
+    {
+       return taskService.getFileFromTask(taskId);
     }
 
 }
